@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Continuous Integration - Axel Hodler</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Continuous Integration
+
+---
+
+# Agenda
+you have been doing it wrong
+
+---
+
+# Reviews
+
+---
+
+# Different scripts
+
+```
+./bin/build.sh
+./bin/jenkins_build.sh
+```
+
+---
+
+# Depend on nothing
+
+people just change stuff in there. i once had a jenkins job with so much configuration part that the browser kept crashing on me. people where actively changing the xml of the job configuration.
+
+---
+## Travis-CI
+
+https://docs.travis-ci.com/user/ci-environment/#Overview
+
+> Travis CI runs builds in isolated virtual machines that offer a vanilla build environment for every build. This has the advantage that no state persists between builds, offering a clean state and making sure that your tests run in an environment built from scratch.
+
+---
+
+# Feature flags
+
+incremental changes.
+
+---
+
+# Global installs
+
+how often i had to delete the whole folder
+
+---
+
+Yoda Quote:
+
+> Branching is the path to the dark side. Branching leads to anger, anger leads to hate, hate leads to suffering.
+
+---
+
+# Introduction
+
+    </textarea>
+    <script src="vendor/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
