@@ -14,6 +14,14 @@
         font-weight: normal;
       }
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .black-background {
+        background-color: black;
+        color: white;
+        text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+      }
+      .yellow-highlight {
+        background-color: yellow;
+      }
     </style>
   </head>
   <body>
@@ -23,10 +31,290 @@ class: center, middle
 
 # Continuous Integration
 
+Axel Hodler
+
+???
+
+Baut auf Erfahrungen die ich die letzten Jahre gesammelt habe. Entsprechend auch Interessiert an Diskussionen bzw euren Erfahrungswerten bzw einer gewisser Interaktivitaet wie ihr die einzelnen Punkte loest.
+
 ---
 
-# Agenda
-you have been doing it wrong
+class: center, middle
+
+###_"Continuous integration (CI) is the practice of merging all developer working copies to a shared mainline [...]"_[en.wikipedia](https://en.wikipedia.org/wiki/Continuous_integration)
+
+???
+vague
+
+---
+
+# How often is continuous?
+
+--
+
+* "_[...] <span class="yellow-highlight">several times a day</span>. [...]_" [en.wikipedia](https://en.wikipedia.org/wiki/Continuous_integration)
+
+
+--
+
+* "_Developers should be integrating and commiting code into the code repository <span class="yellow-highlight">every few hours</span>, when ever possible. In any case __never hold onto changes for more than a day__"_ [extremeprogramming.org](http://www.extremeprogramming.org/rules/integrateoften.html)
+
+
+--
+
+* "_We will check in our code <span class="yellow-highlight">every two to four hours</span>._" [James Shore - 2005](http://www.jamesshore.com/Blog/Continuous-Integration-is-an-Attitude.html)
+
+
+--
+
+* "_[...] usually each person integrates <span class="yellow-highlight">at least daily</span>" [Martin Fowler - 2006](https://www.martinfowler.com/articles/continuousIntegration.html)
+
+---
+
+# German Wikipedia
+
+--
+
+* No exact timing mentioned in [Kontinuierliche Integration](https://de.wikipedia.org/wiki/Kontinuierliche_Integration).
+
+--
+
+* _"Jeder Entwickler __sollte__ seine Änderungen <span class="yellow-highlight">so oft wie möglich</span> in die gemeinsame Code-Basis integrieren"_
+
+--
+
+* Mention in [Extreme Programming](https://de.wikipedia.org/wiki/Extreme_Programming#Permanente_Integration):
+"_[...] die Integration zu einem täglichen Schritt gehört [...]_"
+
+--
+
+---
+
+# Others
+
+* «Tout le monde commit tous les jours» [fr.wikipedia](https://fr.wikipedia.org/wiki/Int%C3%A9gration_continue)
+
+---
+
+# Build config is not in version control
+
+* Only the jenkins administrators "know" how it is built
+
+--
+
+* Scripts are pasted into `Execute Shell` textareas
+
+--
+
+* No one knows what was changed when and why
+
+---
+
+# Build is not in version control - II
+
+* Jenkins job configuration crashed the browser because it was huge. It was not editable via browser
+
+--
+
+* As a solution people access the Jenkins via SSH and changed the `config.xml` for the job manually.
+
+---
+
+# Build is not in version control - III
+
+* Travis-CI does this right with `travis.yml`
+
+--
+
+* There is probably a Jenkins plugin which achieves the same
+
+---
+
+# Build differs on CI-Tool and localhost
+
+```bash
+bin
+├── build.bat
+├── build.sh
+└── build_on_jenkins.sh
+```
+
+--
+
+* Issue where `build.sh` is updated and `build_on_jenkins.sh` is not.
+
+--
+
+* Reveals `build_on_jenkins.sh` does more than build. Maybe also deploy.
+
+--
+
+* Knowledge of deployment should be part of another job
+
+---
+
+# Build depends on global tooling
+
+* Different `Node.js`, `karma` (Test Runner), `grunt-cli` (Task Runner) between jenkins and localhost
+
+--
+
+* Because build depends on having them installed globally
+
+--
+
+### Make the dependency visible and invoke via:
+
+```shell
+./node_modules/protractor/bin/protractor
+```
+
+--
+
+### For Node.JS we can compare versions in build scripts
+
+```javascript
+var actualVersion = process.version
+var expectedVersion = require('./package.json').engines.node
+```
+
+---
+
+# Depend on nothing
+
+* Make sure environment is built from scratch
+
+--
+
+* Avoid build depending on artifacts or already present dependencies of the previous build
+
+--
+
+* _"Yes but we only want to build the diff because its faster"_
+
+---
+
+# Travis-CI does this right
+
+"Travis CI runs builds in isolated virtual machines that offer a <span class="yellow-highlight">vanilla build environment for every build</span>. This has the advantage that <span class="yellow-highlight">no state persists between builds</span>, offering a clean state and making sure that your tests run in an environment built from scratch." [Travis-CI docs](https://docs.travis-ci.com/user/ci-environment/#Overview)
+
+---
+
+# Merge Requests
+
+--
+
+* Protect the master branch with a preflight build.
+
+--
+
+* Don't let humans merge
+
+???
+
+Might seem like a joke but we had it a few times where the merge button was clicked 'accidentally'. e.g. on a mobile connection
+
+---
+
+# Merge Requests II
+
+* The build on the feature branch should not differ from the one on master
+
+--
+
+* Build guarding the integration should not differ from the nightly-build
+
+???
+In two projects we had the case where the integration build was testing less, or different from the master
+
+---
+
+# Merge Requests III
+
+Accepting flaky tests
+
+--
+
+Using [pythons flaky](https://github.com/box/flaky):
+
+```python
+@flaky(max_runs=3, min_passes=2)
+def test_something_that_usually_passes(self):
+```
+
+--
+
+* Build Results switch between Pass and Fail
+
+--
+
+* Developers stop caring "Was probably these flaky tests"
+
+---
+
+# Can the build run offline?
+
+--
+* Checking in dependencies😱?
+
+--
+
+* Fail/Pass does not depend on hitting third-party API
+
+--
+
+* Should our build test if the Facebook OAuth works?
+
+--
+
+* Build does not break on internet disconnects
+
+--
+
+* Can checkout any previous state and have all the dependencies present. See [npm left-pad package unpublished](http://blog.npmjs.org/post/141577284765/kik-left-pad-and-npm)
+
+???
+Not sure about that one. What do you think?
+
+In one project the connection was flaky and led to a red build in master multiple times.
+
+---
+
+class: middle, center
+
+# Feature Branches
+
+---
+
+class: center, middle, black-background
+
+background-image: url(images/yoda.jpg)
+
+# Branching is the path to the dark side. Branching leads to anger, anger leads to hate, hate leads to suffering.
+
+---
+
+# Avoid feature branches older than a day
+
+--
+
+* Can refactor in your branch without fear
+
+--
+
+* Get feedback quicker. Avoid doing the wrong thing.
+
+--
+
+* Can measure progress easier
+
+--
+
+* Can properly review smaller changes
+
+???
+Had reviews were non merged stuff was shown
+Had feature branches sitting around for months.
 
 ---
 
@@ -36,47 +324,81 @@ class: center, middle
 
 ---
 
-# Different scripts
+class: middle, center
 
+# Indicators of having a huge merge request:
+
+> "We're sorry, but it seems that the server timed out trying to fetch the diffs for your merge request. This typically means that the merge request is large. Please review changes locally"
+
+---
+
+class: center, middle
+
+# Avoid branches getting older than a day?
+
+## We can't merge half baked features!
+
+---
+
+# Feature Flag
+
+--
+
+_aka. Feature Toggle or Dark Feature_
+
+
+--
+
+* Turn off features or make them invisible in production
+
+--
+
+* Allows some stakeholders to get a preview of a feature.
+
+--
+
+* Once feature is complete it gets removed from the configuration file
+
+---
+
+# Feature Flag II
+
+Example in Angular2
+
+```html
+<div *ngIf="featureFlags.isActive('RENT_CAR')">
+  <a routerLink="/car-rental">Rent Car</a>
+</div>
 ```
-./bin/build.sh
-./bin/jenkins_build.sh
-```
 
 ---
 
-# Depend on nothing
+# Major impediments
 
-people just change stuff in there. i once had a jenkins job with so much configuration part that the browser kept crashing on me. people where actively changing the xml of the job configuration.
+If integrating is hard then we won't do it often enough.
 
----
-## Travis-CI
+--
 
-https://docs.travis-ci.com/user/ci-environment/#Overview
+* Builds are slow (Huge topic by itself)
 
-> Travis CI runs builds in isolated virtual machines that offer a vanilla build environment for every build. This has the advantage that no state persists between builds, offering a clean state and making sure that your tests run in an environment built from scratch.
+--
 
----
-
-# Feature flags
-
-incremental changes.
+* Having lots of necessary manual steps
 
 ---
 
-# Global installs
+class: center, middle
 
-how often i had to delete the whole folder
+## "CI is not something you have, it's something you do" - [Dan North](https://www.youtube.com/watch?v=lz5HBtDl-1A)
 
----
-
-Yoda Quote:
-
-> Branching is the path to the dark side. Branching leads to anger, anger leads to hate, hate leads to suffering.
+## "CI is an attitude, not a tool" - [James Shore](http://www.jamesshore.com/Blog/Continuous-Integration-is-an-Attitude.html)
 
 ---
 
-# Introduction
+# Images
+
+* [I Am Devloper](https://twitter.com/iamdevloper/status/397664295875805184?lang=de)
+* [Yoda](https://www.wired.com/wp-content/uploads/2015/08/Yoda-featured1.jpg)
 
     </textarea>
     <script src="vendor/remark-latest.min.js">
