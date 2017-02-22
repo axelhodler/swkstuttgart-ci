@@ -286,6 +286,15 @@ def test_something_that_usually_passes(self):
 
 * `"Well it's only red due to the flaky tests. So let's view it as green"`
 
+--
+
+* Release becomes:
+
+```sh
+1.) Brute-force retry release until flaky tests pass
+2.) If its 7pm and they have not yet passed just disable them.
+```
+
 ---
 
 # Can the build run offline?
