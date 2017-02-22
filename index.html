@@ -46,6 +46,23 @@ class: center, middle
 
 ???
 vague
+often extended as a quality control.
+
+---
+
+# Why?
+
+--
+
+* Prevent integration problems.
+
+--
+
+* Integrating small pieces is easier than integrating days or months of work.
+
+--
+
+* Often extended with quality controls (Automated Tests, Code metrics ...)
 
 ---
 
@@ -80,7 +97,7 @@ vague
 
 --
 
-* _"Jeder Entwickler __sollte__ seine Änderungen <span class="yellow-highlight">so oft wie möglich</span> in die gemeinsame Code-Basis integrieren"_
+* _"Jeder Entwickler <span class="yellow-highlight">sollte</span> seine Änderungen <span class="yellow-highlight">so oft wie möglich</span> in die gemeinsame Code-Basis integrieren"_
 
 --
 
@@ -97,13 +114,21 @@ vague
 
 ---
 
+class: center, middle
+
+# Bad practices
+
+---
+
 # Build config is not in version control
+
+--
 
 * Only the jenkins administrators "know" how it is built
 
 --
 
-* Scripts are pasted into `Execute Shell` textareas
+* Scripts are pasted into `Execute Shell` textareas in a Web UI
 
 --
 
@@ -113,17 +138,17 @@ vague
 
 # Build is not in version control - II
 
-* Jenkins job configuration crashed the browser because it was huge. It was not editable via browser
+* Example: Jenkins job configuration crashed the browser because it was huge. It was not editable via browser
 
 --
 
-* As a solution people access the Jenkins via SSH and changed the `config.xml` for the job manually.
+* As a solution people access the Jenkins via SSH and changed the `config.xml` for the job with a text editor.
 
 ---
 
 # Build is not in version control - III
 
-* Travis-CI does this right with `travis.yml`
+* Travis-CI does this right with `.travis.yml`
 
 --
 
@@ -131,7 +156,7 @@ vague
 
 ---
 
-# Build differs on CI-Tool and localhost
+# Build differs between CI-Tool and localhost
 
 ```bash
 bin
@@ -146,15 +171,17 @@ bin
 
 --
 
-* Reveals `build_on_jenkins.sh` does more than build. Maybe also deploy.
+* Could reveal `build_on_jenkins.sh` does more than build. Maybe it also deploys?
 
 --
 
-* Knowledge of deployment should be part of another job
+* Knowledge of deployment should be part of another job or step
 
 ---
 
 # Build depends on global tooling
+
+--
 
 * Different `Node.js`, `karma` (Test Runner), `grunt-cli` (Task Runner) between jenkins and localhost
 
@@ -187,11 +214,15 @@ var expectedVersion = require('./package.json').engines.node
 
 --
 
-* Avoid build depending on artifacts or already present dependencies of the previous build
+* Avoid a build depending on artifacts of the previous build in the same workspace
 
 --
 
-* _"Yes but we only want to build the diff because its faster"_
+* Jenkins: `"Delete workspace before build starts"`
+
+--
+
+* _"Yes but we only want to build and test the diff because its faster"_
 
 ---
 
@@ -209,7 +240,7 @@ var expectedVersion = require('./package.json').engines.node
 
 --
 
-* Don't let humans merge
+* Best case: Don't let humans merge
 
 ???
 
@@ -232,7 +263,7 @@ In two projects we had the case where the integration build was testing less, or
 
 # Merge Requests III
 
-Accepting flaky tests
+* Accepting flaky tests
 
 --
 
@@ -249,7 +280,11 @@ def test_something_that_usually_passes(self):
 
 --
 
-* Developers stop caring "Was probably these flaky tests"
+* Developers stop caring
+
+--
+
+* `"Well it's only red due to the flaky tests. So let's view it as green"`
 
 ---
 
